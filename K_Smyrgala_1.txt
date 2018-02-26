@@ -1,0 +1,18 @@
+Dla kazdej grupy wyznaczamy nastepujacy rekord (1 wiersz danych):
+1 - rok
+2 - rotacja Carringtona
+3 - numer grupy
+4 - czas pojawienia sie na tarczy
+5 - czas konca trwania grupy
+6 - powierzchnia sumaryczna
+7 - wazona powirzchnia dlugosc heliograficzna
+8 - wazona powirzchnia szerokosc heliograficzna
+9 - liczba z [0,1] okreslajaca moment pojawienia sie na tarczy
+    (0-brzeg wschodni; 0.5-srodek tarczy; 1- brzeg zachodni)
+10 - liczba z [0,1] okreslajaca moment konca trwania grupy na tarczy
+11 - minimalna dlugosc heliograficzna grupy
+12 - maksymalna dlugosc heliograficzna grupy
+13 - zakres dlugosci grupy (12-11)
+14 - minimalna szerokosc heliograficzna grupy
+15 - maksymalna szerokosc heliograficzna grupy
+16 - zakres szerokosci grupy (15-14)
