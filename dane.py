@@ -1,41 +1,24 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 import pandas as pd
 from datetime import datetime
 from astropy.time import Time
 import numpy as np
 
+
 def main():
 	
+	# czytaj i wyczyśc dane oraz dodaj odpowiednie kolumny
 	df = pd.read_fwf('gDPD1993.txt', header=None, names=["typ","YYYY","MM","DD","HH","mm","ss","NOAA","UmbraArea","SpotArea","CorUmbraArea","CorSpotArea","szerokosc","dlugosc","LongitudinalDistance","angle","Distance"])
-	#print (df.head(10))
-
 	df = df.sort_values(by='NOAA') 
-	#print (df.head(10))
 
 	df['julianDay'] = df.apply(julian_day, axis=1)
-	#df['three'] = df['one'] * df['two']
 	df['dlug*pow'] = df['dlugosc'] * df['CorSpotArea']
 	df['szer*pow'] = df['szerokosc'] * df['CorSpotArea']
 	df['miejsce_na_tarczy'] = (df['LongitudinalDistance'] +90)/180
 	df['Carrington'] = carrington_rotation(df)
-		
-	#print (df.head(10))
-	
-     	
-	#print (df.head(10))
 
-	#print (df.at[0,'J3'])  
-
-
-
-	#df_filtered = df.query('NOAA== 7379 ')
-	#print(df_filtered)
-	#print("AA")
-	#print(df.groupby('NOAA')['julianDay']['SpotArea'].min().sum())	
-
-	#df_grouped = df.groupby('NOAA')
-	#df.groupby('A').agg({'B': ['min', 'max'], 'C': 'sum'})
+	# grupuj dane - wartości uśrednione dla danej grupy
 	df_grouped = df.groupby('NOAA').agg({'YYYY': 'min', 'Carrington': 'min','miejsce_na_tarczy': ['min', 'max'],'dlugosc': ['min', 'max'],'szerokosc': ['min', 'max'],'julianDay': ['min', 'max'], 'CorSpotArea': 'sum', 'dlug*pow': 'sum', 'szer*pow': 'sum'})
 	del(df)
 
@@ -44,6 +27,7 @@ def main():
 	df_grouped['sr_szer'] = df_grouped['szer*pow']['sum'] / df_grouped['CorSpotArea']['sum']
 	df_grouped['sr_dlug'] = df_grouped['dlug*pow']['sum'] / df_grouped['CorSpotArea']['sum']
 
+	# ustaw kolumny w odpowiedniej kolejności i zmień nagłówki 
 	df_final = df_grouped
 	del(df_grouped)
 	
@@ -54,8 +38,10 @@ def main():
 
 	print(df_final.head(5))
 
-	
+
+
 def julian_day(x):
+	# wyznacz dzień juliański dla danej daty
 	year = x['YYYY']
 	month = x['MM']
 	day = x['DD']
@@ -66,7 +52,7 @@ def julian_day(x):
 	return t.jd
 
 def carrington_rotation(x):
-	#rotacjeCarr = {}
+	# wyznacz nr rotacji Carringtona dla danego dnia juliańskiego
 	inputFile = open('carrington.txt','r')
 	nr_rotacji = []
 	df_rows = x.shape[0]
@@ -77,39 +63,23 @@ def carrington_rotation(x):
 		data = row.split("\t")
 		rozpoczeta_rotacja = int(data[0])
 		dzien_rozpoczecia = float(data[1])
-		#rotacjeCarr[dzien_rozpoczecia] = rozpoczeta_rotacja
 		listRotacje.append(rozpoczeta_rotacja)
 		listDni.append(dzien_rozpoczecia)
 	inputFile.close()
 
-	#rotacjeCarr_sorted = sorted(rotacjeCarr)
 	for i in range(df_rows):
 		julianday = x.at[i,'julianDay']
 
-		"""
-		for dzien in rotacjeCarr_sorted:
-			if dzien < julianday:
-				rotacja = rotacjeCarr[dzien]
-			else:
-				break
-		"""
 		for dzien in listDni:
-
 			if dzien >= julianday:
 				rotacja = listRotacje[listDni.index(dzien)-1]
 				break
 
 		nr_rotacji.append(rotacja)
+		
 	del(listRotacje,listDni,df_rows)
-	#del(rotacjeCarr)
 	return nr_rotacji
 
 main()
-
-
-
-
-
-
 
 
