@@ -1,0 +1,34 @@
+* Aktywność słoneczna
+
+Słońce oglądane gołym okiem wydaje się być jednolitą, oślepiającą tarczą. Jednak gdy spojrzymy na nie przez odpowiedni filtr lub przy wykorzystaniu przyrządów optycznych, okazuje się, że widziana przez nas "powierzchnia" Słońca - jego warstwa zwana fotosferą, nie jest równomiernie jasna. W rzeczywistości na Słońcu zachodzą rozmaite zjawiska, część z nich jest obserwowana również na fotosferze. Jednym z bardziej znanych i łatwych do zaobserwowania zjawisk są plamy słoneczne. Są to ciemne, nieregularne obszary o rozmiarach od kilkuset do nawet 100 tysięcy kilometrów. 
+
+* Plamy słoneczne
+
+Plamy słoneczne są obserwowane jako obszary ciemniejsze, ponieważ mają niższą temperaturę niż otaczająca je fotosfera. Powierzchnie plam są chłodniejsze o około 1500K, czyli osiągają temperatury 4200-4500K. Obserwacja ich jako struktur ciemnych, niemal czarnych, wynika wyłącznie z kontrastu z otoczeniem, które osiąga temperaturę około 5800K. Kontrast ten jest tak duży, ponieważ ilośc emitowanej energii (jasność) jest proporcjonalna do temperatury w czwartej potędze. Zależność ta jest znana jako prawo Stefana-Boltzmanna i można ją opisać opisać wzorem: 
+\begin{equation}  
+F = \sigma T_{\mathrm{eff}}^{4} , \vspace*{-10pt}
+\label{eqn:prawostefana}
+\end{equation} %\vspace*{1pt}
+gdzie \(F\) - emitowany strumień promieniowania, czyli jasność, \\ \(\sigma\) - stała Stefana-Boltzmanna, \\ \(T_{\mathrm{eff}}\) - temperatura efektywna ciała. \\ \noindent
+
+
+
+* Fizyka plam słonecznych
+
+Plamy słoneczne powstają w miejscach, gdzie strumień bardzo silnego pola magnetycznego przecina prostopadle fotosferę. Indukcja takiego pola sięga 0.2-0.4T, czyli jest ono około 6000 razy silniejsze niż pole magnetyczne Ziemi. To silne lokalne pole magnetyczne można zobrazować jako gigantyczną rurę magnetyczną przenikającą słoneczną fotosferę. Aby równowaga była zachowana, suma ciśnień plazmy oraz magnetycznego muszą być takie same wewnętrz oraz na zewnątrz magnetycznej rury. Silne pole magnetyczne wewnątrz plamy skutkuje wysokim ciśnieniem magnetycznym - wyższym niż w otaczającej fotosferze. Dla zachowania równowagi ciśnienie plazmy w tym obszarze musi być niższe. Powoduje to zaburzenie transportu konwektywnego wewnątrz plamy oraz obniżenie jej temperatury\footnote{Konwekcja jest sposobem wymiany ciepła, w wyniku którego materia cieplejsza jest transportowana do chłodniejszych rejonów. Transport konwektywny pojawia się wtedy, gdy gradient temperatury jest odpowiednio wysoki. }. 
+
+Pole magnetyczne musi zachować ciągłość, dlatego każda z tych rur magnetycznych jest właściwie pętlą pola magnetycznego. Powoduje to pojawianie się plam słonecznych parami, w których każda z nich ma odwrotną biegunowość. Zazwyczaj wytępują one wręcz w grupach złożonych z wielu plam. 
+
+** Budowa plam słonecznych
+
+W większości plam można wyraźnie dostrzec ciemniejsze jądro, zwane cieniem plamy, oraz nieco jaśniejszy półcień otaczający to jądro. Półcień stanowi około 70% powierzchni plamy, jedynie najmniejsze z plam są jego pozbawione - są one nazywane porami. Różnica jasności cienia i półcienia również wynika z ich różnych temperatur - w centrum plamy wynosi ona około 4200-4500K, zaś dla otaczającego półcienia około 5300K. Plamy wydają się niewielkie w stosunku do powierzchni Słońca, jednak w porównaniu do człowieka są ogromne. Rozmiary plam sięgają od kilkuset do nawet 100 tysięcy kilometrów. Powierzchnie dużych plam są znacznie większe od powierzchni Ziemi. 
+
+Plamy są obiektami dynamicznymi, w trakcie swojego życia nieustannie ewoluują i się przemieszczają, nie zachowują ani rozmiarów, ani kształtów. Czas życia plam wynosi od kilku godzin do nawet kilku miesięcy. Pory zanikają już po około 1 dniu, z kolei większe plamy rozpadają się wolniej, poprzez podział na mniejsze fragmenty. 
+[TO DO: dodać o zmianie położenia - spływanie ku równikowi.]
+
+** Okresowość plam słonecznych
+
+Liczba plam na tarczy słonecznej nie jest stała. Podobnie jak obecność innych zjawisk na naszej gwieździe, zmienia się ona cyklicznie z okresem około 11 lat. Często używanym wskaźnikiem aktywności słonecznej jest liczba Wolfa. Wyznacza się ją znając liczbę widocznych plam oraz ich grup korzystając ze wzoru: \begin{equation}  W = (10g + p)k, \vspace*{-10pt}
+\label{eqn:liczbawolfa}
+\end{equation} %\vspace*{1pt}
+gdzie \(W\) - liczba Wolfa, \\ \(\g\) - liczba grup, \\ \(p\) - liczba plam, \\ \(k\) - współczynnik proporcjonalności dla danego instrumentu optycznego. \\ \noindent Liczba Wolfa może się gwałtownie zmieniać z dnia na dzień, ponieważ mocno zależy od liczby grup plam widocznych z Ziemi. Kiedy grupa złożona z kilkudziesięciu plam znika za brzegiem tarczy, liczba Wolfa może spaść aż o 40, a efekt ten nie wynika ze zmiany aktywności Słońca. W związku z takimi przypadkami, zwykle używa się liczb Wolfa uśrednionych dla całego roku. Zmiany ich wartości na przestrzeni lat świetnie obrazują 11-letni cykl aktywności słonecznej. 
