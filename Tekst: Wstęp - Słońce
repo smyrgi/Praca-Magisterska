@@ -1,3 +1,7 @@
+* Rotacja Słońca
+
+Słońce podobnie do Ziemi, nie jest nieruchome. Przemieszcza się nie tylko względem naszej galaktyki, ale również rotuje wokół własnej osi. Ponieważ jest ono zbudowane z plazmy, nie obraca się jak ciało sztywne. Plazma słoneczna obraca się z różnymi prędkościami w zależności od szerokości heliograficznej. Efekt ten jest nazywany rotacją różnicową. Okres obiegu plazmy słonecznej zależy również od jej odległości od centrum gwiazdy, jednak na potrzeby tej rozprawy rozważymy jedynie rotację na poziomie fotosfery. Na powierzchni Słońca plazma potrzebuje zaledwie 25 dni na pełen obrót w okolicach równika, na szerokości heliograficznej (\45^{\circ}\\) okres obrotu wzrasta do 27.6 dnia, zaś w okolicach biegunów osiąga aż 30.8 dni. 
+
 * Aktywność słoneczna
 
 Słońce oglądane gołym okiem wydaje się być jednolitą, oślepiającą tarczą. Jednak, gdy lepiej się przyjrzymy (obserwując w odpowiedni sposób), okazuje się, że widziana przez nas gwiazda nie jest równomiernie jasna. Warto wspomnieć, że Słońce nie posiada wyraźnie zaznaczonej powierzchni, ponieważ składa się z plazmy, nie ciała stałego. Pojęcia "powierzchnia Słońca" używa się czasem w odniesieniu do warstwy, którą dostrzegamy w świetle widzialnym, zwanej fotosferą. Właśnie na fotosferze występuje zjawisko, które jest tematem tej rozprawy, oraz które możemy dostrzec nawet gołym okiem - plamy słoneczne. Są to ciemne, nieregularne obszary o rozmiarach od kilkuset do nawet 100 tysięcy kilometrów. Są one jednym z najbardziej znanych i łatwych do zaobserwowania przejawów aktywności słonecznej. 
@@ -14,7 +18,7 @@ gdzie \(F\) - emitowany strumień promieniowania, czyli jasność, \\ \(\sigma\)
 
 
 
-* Fizyka plam słonecznych
+** Fizyka plam słonecznych
 
 Plamy słoneczne powstają w miejscach, gdzie strumień bardzo silnego pola magnetycznego przecina prostopadle fotosferę. Indukcja takiego pola sięga 0.2-0.4T, czyli jest ono około 6000 razy silniejsze niż pole magnetyczne Ziemi. To silne lokalne pole magnetyczne można zobrazować jako gigantyczną rurę magnetyczną przenikającą powierzchnię gwiazdy. Każdy układ fizyczny dąży do osiągnięcia stanu równowagi. W tym przypadku zostanie ona zachowana, gdy suma ciśnienia plazmy oraz ciśnienia magnetycznego będzie taka sama wewnątrz oraz na zewnątrz magnetycznej rury. Silne pole magnetyczne wewnątrz plamy skutkuje wysokim ciśnieniem magnetycznym - wyższym niż w otaczającej fotosferze. Dla zachowania równowagi ciśnienie plazmy w tym obszarze musi być niższe, czyli musi być ona rzadsza - zawierać mniej materii. Powoduje to zaburzenie transportu konwektywnego wewnątrz plamy oraz obniżenie jej temperatury\footnote{Konwekcja jest sposobem wymiany ciepła, w wyniku którego materia cieplejsza jest transportowana do chłodniejszych rejonów. Transport konwektywny pojawia się wtedy, gdy gradient temperatury jest odpowiednio wysoki. }. Jak zostało wyżej napisane, niższa temperatura powoduje mniejszą jasność, dlatego plamy wydają się ciemne. 
 
@@ -26,7 +30,7 @@ W większości plam można wyraźnie dostrzec ciemniejsze jądro, zwane cieniem 
 
 Plamy są obiektami dynamicznymi, w trakcie swojego życia nieustannie ewoluują i przemieszczają się. Czas życia plam wynosi od kilku godzin do nawet kilku miesięcy. Pory zanikają już po około 1 dniu, z kolei większe plamy rozpadają się wolniej, poprzez podział na mniejsze fragmenty. 
 
-Szerokość heliograficzna występowania plam nie jest przypdakowa. Otóż w różnych okresach cyklu aktywności pojawiają się one w różnych strefach tarczy. Na jego początku plamy obserwuje się w odległości około (\35^{\circ}\\) od równika. Wraz z trwaniem cyklu, szerokość heliograficzna ich występowania maleje, osiągając około (\15^{\circ}\\) w maksimum aktywności oraz około (\5^{\circ}\\) na koniec cyklu. Kiedy w okolicach równika jeszcze obserwuje się plamy starego cyklu, mogą już się pojawiać plamy nowego cyklu ponownie w odległości około (\35^{\circ}\\) od równika. Własność ta została nazwana od nazwiska odkrywcy prawem Sporera (To do: o umlaut). Wykreślając zależność szerokości heliograficznej od czasu pojawienia się plamy otrzymujemy wykres motylkowy. 
+Szerokość heliograficzna występowania plam nie jest przypadkowa. W różnych okresach cyklu aktywności pojawiają się one w innych strefach na tarczy. Na jego początku plamy obserwuje się w odległości około (\35^{\circ}\\) od równika. Wraz z trwaniem cyklu, szerokość heliograficzna ich występowania maleje, osiągając około (\15^{\circ}\\) w maksimum aktywności oraz około (\5^{\circ}\\) na koniec cyklu. Kiedy w okolicach równika jeszcze obserwuje się plamy starego cyklu, mogą już się pojawiać plamy nowego cyklu ponownie w odległości około (\35^{\circ}\\) od równika. Własność ta została nazwana od nazwiska odkrywcy prawem Sporera (To do: o umlaut). Wykreślając zależność szerokości heliograficznej od czasu pojawienia się plamy otrzymujemy wykres motylkowy. 
 
 
 ** Okresowość plam słonecznych
@@ -35,3 +39,4 @@ Liczba obserwowanych plam nie jest stała. Podobnie jak obecność innych zjawis
 \label{eqn:liczbawolfa}
 \end{equation} %\vspace*{1pt}
 gdzie \(W\) - liczba Wolfa, \\ \(\g\) - liczba grup, \\ \(p\) - liczba plam, \\ \(k\) - współczynnik proporcjonalności dla danego instrumentu optycznego. \\ \noindent Liczba Wolfa może się gwałtownie zmieniać z dnia na dzień, ponieważ silnie zależy od liczby widocznych grup plam. Kiedy grupa złożona z kilkudziesięciu plam znika za brzegiem tarczy, liczba Wolfa może spaść nawet o 40, co w żaden sposób nie wynika ze zmiany aktywności słonecznej. W celu uniknięcia fałszywych wniosków wynikających z takich przypadków, zwykle używa się liczb Wolfa uśrednionych dla całego roku. Zmiany ich wartości na przestrzeni lat świetnie obrazują 11-letni cykl aktywności słonecznej. 
+
