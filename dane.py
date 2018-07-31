@@ -30,11 +30,11 @@ def main():
 	
 	df = df.sort_values(by='NOAA') 
 	
-	df['julianDay'] = df.apply(julian_day, axis=1)
+	df['julianDay'] = df.apply(get_julian_day, axis=1)
 	df['dlug*pow'] = df['dlugosc'] * df['CorSpotArea']
 	df['szer*pow'] = df['szerokosc'] * df['CorSpotArea']
 	df['miejsce_na_tarczy'] = (df['LongitudinalDistance'] +90)/180
-	df['Carrington'] = carrington_rotation(df)
+	df['Carrington'] = get_carrington_rotation(df)
 
 	# grupuj dane - wartości uśrednione dla danej grupy
 	df_grouped = df.groupby('NOAA').agg({'YYYY': 'min', 'Carrington': 'min','miejsce_na_tarczy': ['min', 'max'],'dlugosc': ['min', 'max'],'szerokosc': ['min', 'max'],'julianDay': ['min', 'max'], 'CorSpotArea': 'sum', 'dlug*pow': 'sum', 'szer*pow': 'sum'})
@@ -102,51 +102,51 @@ def main():
 
 
 
-def julian_day(x):
+def get_julian_day(date):
 	# wyznacz dzień juliański dla danej daty
-	year = x['YYYY']
-	month = x['MM']
-	day = x['DD']
-	hour = x['HH']
-	minute = x['mm']
-	second = x['ss']
-	t = Time(datetime(year, month, day, hour, minute, second), scale='utc')
-	return t.jd
+	year = date['YYYY']
+	month = date['MM']
+	day = date['DD']
+	hour = date['HH']
+	minute = date['mm']
+	second = date['ss']
+	time = Time(datetime(year, month, day, hour, minute, second), scale='utc')
+	return time.jd
 
 
 
 
-def carrington_rotation(x):
+
+def get_carrington_rotation(x):
 	# wyznacz nr rotacji Carringtona dla danego dnia juliańskiego
-	inputFile = open('carrington.txt','r')
 	nr_rotacji = []
 	df_rows = x.shape[0]
-	listRotacje = []
-	listDni = []
+	rotations = []
+	julian_days = []
 	#print(df_rows)
-	for row in inputFile:
+	input_file = open('carrington.txt','r')
+	for row in input_file:
 		data = row.split("\t")
-		rozpoczeta_rotacja = int(data[0])
-		dzien_rozpoczecia = float(data[1])
-		listRotacje.append(rozpoczeta_rotacja)
-		listDni.append(dzien_rozpoczecia)
-	inputFile.close()
+		rotation = int(data[0])
+		julian_day = float(data[1])
+		rotations.append(rotation)
+		julian_days.append(julian_day)
+	input_file.close()
 
 	for i in range(df_rows):
 		#print(i)
-		julianday = x.at[i,'julianDay']
+		current_julian_day = x.at[i,'julianDay']
 
-		for dzien in listDni:
-			if dzien >= julianday:
-				rotacja = listRotacje[listDni.index(dzien)-1]
+		for julian_day in julian_days:
+			if julian_day >= current_julian_day:
+				current_rotation = rotations[julian_days.index(julian_day)-1]
 				break
 
-		nr_rotacji.append(rotacja)
+		nr_rotacji.append(current_rotation)
 		
-	del(listRotacje,listDni,df_rows)
+	del(rotations,julian_days,df_rows)
 	return nr_rotacji
-
+	
 main()
-
 
 
