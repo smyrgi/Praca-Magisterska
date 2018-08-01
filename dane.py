@@ -3,105 +3,60 @@
 import pandas as pd
 from datetime import datetime
 from astropy.time import Time
-import numpy as np
 
 
 def main():
+	columns_names = ["DataType","YYYY","MM","DD","HH","mm","ss","NOAA","UmbraArea","WholeSpotArea", "CorrectedUmbraArea",
+					 "CorrectedWholeSpotArea", "Latitude","Longitude", "LongitudinalDistance","PositionAngle","DistanceFromCentre"]
+	sunspot_data = pd.read_fwf('gDPD1978aa.txt', header=None, names=columns_names)
+	sunspot_data = validate_input(sunspot_data)	
 	
-	# czytaj i wyczyść dane oraz dodaj odpowiednie kolumny
-	df = pd.read_fwf('gGPR1874.txt', header=None, names=["typ","YYYY","MM","DD","HH","mm","ss","NOAA","UmbraArea","SpotArea","CorUmbraArea","CorSpotArea","szerokosc","dlugosc","LongitudinalDistance","angle","Distance"])
-	# poprawić dla GPR - więcej kolumn
-	print(df.head(10))
-	quit()
-	df = df[(df[['szerokosc','dlugosc','LongitudinalDistance','angle','Distance']] != 999999).all(axis=1)].reset_index(drop=True)
-	df = df.sort_values(by='ss') 
-	#print(df.tail(10))
+	sunspot_data = add_data(sunspot_data)
+
+	sunspot_data_grouped = get_average(sunspot_data)
+	del(sunspot_data)
+
+	sunspot_data_final = format_data(sunspot_data_grouped)
+	del(sunspot_data_grouped)
 	
-	#print(df.loc[df['ss'] == 60])
-
-	# poprawka dla sekund = 60
-	df.loc[df['ss'] == 60, "mm"] = df.loc[df['ss'] == 60, "mm"] + 1
-	df.loc[df['ss'] == 60, "ss"] = 0
-	#print("DD")
-	#print(df.loc[df['ss'] == 0])
-	#(df.loc[df['ss'] == 60])['mm'] = (df.loc[df['ss'] == 60])['mm'] + 1
-
-	quit()
-	
-	df = df.sort_values(by='NOAA') 
-	
-	df['julianDay'] = df.apply(get_julian_day, axis=1)
-	df['dlug*pow'] = df['dlugosc'] * df['CorSpotArea']
-	df['szer*pow'] = df['szerokosc'] * df['CorSpotArea']
-	df['miejsce_na_tarczy'] = (df['LongitudinalDistance'] +90)/180
-	df['Carrington'] = get_carrington_rotation(df)
-
-	# grupuj dane - wartości uśrednione dla danej grupy
-	df_grouped = df.groupby('NOAA').agg({'YYYY': 'min', 'Carrington': 'min','miejsce_na_tarczy': ['min', 'max'],'dlugosc': ['min', 'max'],'szerokosc': ['min', 'max'],'julianDay': ['min', 'max'], 'CorSpotArea': 'sum', 'dlug*pow': 'sum', 'szer*pow': 'sum'})
-	del(df)
-
-	df_grouped['roznica_dlug'] = df_grouped['dlugosc']['max'] - df_grouped['dlugosc']['min']
-	df_grouped['roznica_szer'] = df_grouped['szerokosc']['max'] - df_grouped['szerokosc']['min']
-	df_grouped['sr_szer'] = df_grouped['szer*pow']['sum'] / df_grouped['CorSpotArea']['sum']
-	df_grouped['sr_dlug'] = df_grouped['dlug*pow']['sum'] / df_grouped['CorSpotArea']['sum']
-
-	# ustaw kolumny w odpowiedniej kolejności i zmień nagłówki 
-	df_final = df_grouped
-	del(df_grouped)
-	
-	df_final.columns = [' '.join(col).strip() for col in df_final.columns.values]
-	df_final.reset_index(inplace=True)
-	df_final = df_final[['YYYY min', 'Carrington min','NOAA','julianDay min','julianDay max','CorSpotArea sum','sr_dlug','sr_szer','miejsce_na_tarczy min','miejsce_na_tarczy max','dlugosc min','dlugosc max','roznica_dlug','szerokosc min','szerokosc max','roznica_szer']]
-	df_final.columns = ['rok', 'rotacja Carringtona', 'nr grupy','czas pojawienia','czas konca','powierzchnia sum.','wazona dlugosc','wazona szerokosc','moment pojawienia','moment konca','min. dlugosc','maks. dlugosc','zakres dlugosci','min. szerokosc','maks. szerokosc','zakres szerokosci']
-
-	
-	# walidacja danych
-	df_rows = df_final.shape[0]
-	for i in range(df_rows):
-		noaa = df_final.at[i,'nr grupy']
-		powierzchnia = df_final.at[i,'powierzchnia sum.']
-		moment_pojawienia = df_final.at[i,'moment pojawienia']
-		moment_konca = df_final.at[i,'moment konca']
-		dlugosc_min = df_final.at[i,'min. dlugosc']
-		dlugosc_maks = df_final.at[i,'maks. dlugosc']
-		szerokosc_min = df_final.at[i,'min. szerokosc']
-		szerokosc_maks = df_final.at[i,'maks. szerokosc']
-		dlugosc_zakres = df_final.at[i,'zakres dlugosci']
-		szerokosc_zakres = df_final.at[i,'zakres szerokosci']
+	error_message = validate_final(sunspot_data_final)
+	if error_message: 
+		print (error_message)
+	else:
+		sunspot_data_final.to_csv('output1aa.txt', sep='	', header = None, index = None)
 		
-		if powierzchnia < 0 or powierzchnia >= 999999:
-			print("Niepoprawne dane - sumaryczna powierzchnia: ", powierzchnia, " dla grupy: ", noaa)
-			quit()
-		elif moment_pojawienia < 0 or moment_pojawienia > 1:
-			print("Niepoprawne dane - miejsce pojawienia na tarczy: ", moment_pojawienia, " dla grupy: ", noaa)
-			quit()
-		elif moment_konca < 0 or moment_konca > 1:
-			print("Niepoprawne dane - miejsce zaniku na tarczy: ", moment_konca, " dla grupy: ", noaa)
-			quit()
-		elif dlugosc_min < 0 or dlugosc_min > 360:
-			print("Niepoprawne dane - długość heliograficzna: ", dlugosc_min, " dla grupy: ", noaa)
-			quit()
-		elif dlugosc_maks < 0 or dlugosc_maks > 360:
-			print("Niepoprawne dane - długość heliograficzna: ", dlugosc_maks, " dla grupy: ", noaa)
-			quit()
-		elif szerokosc_min < -180 or szerokosc_min > 180:
-			print("Niepoprawne dane - szerokość heliograficzna: ", szerokosc_min, " dla grupy: ", noaa)
-			quit()
-		elif szerokosc_maks < -180 or szerokosc_maks > 180:
-			print("Niepoprawne dane - szerokość heliograficzna: ", szerokosc_maks, " dla grupy: ", noaa)
-			quit()
-		elif dlugosc_zakres < 0 or dlugosc_zakres > 360:
-			print("Niepoprawne dane - długość heliograficzna: ", dlugosc_maks, " dla grupy: ", noaa)
-			quit()
-		elif szerokosc_zakres < 0 or szerokosc_zakres > 360:
-			print("Niepoprawne dane - szerokość heliograficzna: ", szerokosc_maks, " dla grupy: ", noaa)
-			quit()
+
+
+def validate_input(sunspot_data):
+	corrected_sunspot_data = remove_invalid(sunspot_data)
+	corrected_sunspot_data = correct_seconds(corrected_sunspot_data)
+	return corrected_sunspot_data
+	
+	
+def remove_invalid(sunspot_data):
+	columns_to_validate = ['Latitude','Longitude','LongitudinalDistance','PositionAngle','DistanceFromCentre']
+	invalid_data = 999999
+	valid_sunspot_data = sunspot_data[(sunspot_data[columns_to_validate] != invalid_data).all(axis=1)]
+	corrected_sunspot_data = valid_sunspot_data.reset_index(drop=True)
+	return corrected_sunspot_data
+	
+	
+def correct_seconds(sunspot_data):
+	sunspot_data.loc[sunspot_data['ss'] == 60, "mm"] += 1
+	sunspot_data.loc[sunspot_data['ss'] == 60, "ss"] = 0
+	return sunspot_data
+	
 		
-		
-	df_final.to_csv('output1.txt', sep='	', header = None, index = None)
-
-
-
+	
+def add_data(sunspot_data):
+	sunspot_data['JulianDay'] = sunspot_data.apply(get_julian_day, axis=1)
+	sunspot_data['Longitude*Area'] = sunspot_data['Longitude'] * sunspot_data['CorrectedWholeSpotArea']
+	sunspot_data['Latitude*Area'] = sunspot_data['Latitude'] * sunspot_data['CorrectedWholeSpotArea']
+	sunspot_data['PositionOnDisk'] = ( sunspot_data['LongitudinalDistance'] + 90 ) / 180
+	sunspot_data['CarringtonRotation'] = get_carrington_rotations(sunspot_data)
+	return sunspot_data
+	
+	
 def get_julian_day(date):
 	# wyznacz dzień juliański dla danej daty
 	year = date['YYYY']
@@ -114,39 +69,109 @@ def get_julian_day(date):
 	return time.jd
 
 
+def get_carrington_rotations(sunspot_data):
+	rotations_numbers = []
+	sunspot_data_records = sunspot_data.shape[0]
+	
+	rotations_starts = get_starts()
+	
+	for record in range(sunspot_data_records):
+		current_julian_day = sunspot_data.at[record,'JulianDay']
+		current_rotation_number = get_current( current_julian_day, rotations_starts )
+		rotations_numbers.append(current_rotation_number)
+
+	return rotations_numbers
 
 
-
-def get_carrington_rotation(x):
-	# wyznacz nr rotacji Carringtona dla danego dnia juliańskiego
-	nr_rotacji = []
-	df_rows = x.shape[0]
-	rotations = []
+def get_starts():
+	rotations_start_days = []
+	rotations_numbers = []
 	julian_days = []
-	#print(df_rows)
-	input_file = open('carrington.txt','r')
-	for row in input_file:
-		data = row.split("\t")
-		rotation = int(data[0])
-		julian_day = float(data[1])
-		rotations.append(rotation)
-		julian_days.append(julian_day)
-	input_file.close()
+	
+	with open('carrington.txt','r') as input_file:
+		for line in input_file:
+			rotation_number, julian_day = line.split("\t")
+			rotations_numbers.append(int(rotation_number))
+			julian_days.append(float(julian_day))
+	
+	return [rotations_numbers, julian_days]
+	
 
-	for i in range(df_rows):
-		#print(i)
-		current_julian_day = x.at[i,'julianDay']
-
-		for julian_day in julian_days:
-			if julian_day >= current_julian_day:
-				current_rotation = rotations[julian_days.index(julian_day)-1]
-				break
-
-		nr_rotacji.append(current_rotation)
+def get_current( julian_day, rotations_start_days ):
+	rotations_numbers = rotations_start_days[0]
+	julian_days = rotations_start_days[1]
+	for iterator in range(len(julian_days)):
+		if julian_days[iterator] <= julian_day < julian_days[iterator + 1]:
+			return rotations_numbers[iterator]
 		
-	del(rotations,julian_days,df_rows)
-	return nr_rotacji
+		
+		
+def get_average(sunspot_data):
+	sunspot_data_grouped = sunspot_data.groupby('NOAA').agg({'YYYY': 'min', 'CarringtonRotation': 'min','PositionOnDisk': ['min', 'max'],
+															 'Longitude': ['min', 'max'],'Latitude': ['min', 'max'],'JulianDay': ['min', 'max'], 
+															 'CorrectedWholeSpotArea': 'sum', 'Longitude*Area': 'sum', 'Latitude*Area': 'sum'})
+	
+	sunspot_data_grouped['LongitudeRange'] = sunspot_data_grouped['Longitude']['max'] - sunspot_data_grouped['Longitude']['min']
+	sunspot_data_grouped['LatitudeRange'] = sunspot_data_grouped['Latitude']['max'] - sunspot_data_grouped['Latitude']['min']
+	sunspot_data_grouped['LongitudeAverage'] = sunspot_data_grouped['Longitude*Area']['sum'] / sunspot_data_grouped['CorrectedWholeSpotArea']['sum']
+	sunspot_data_grouped['LatitudeAverage'] = sunspot_data_grouped['Latitude*Area']['sum'] / sunspot_data_grouped['CorrectedWholeSpotArea']['sum']
+	return sunspot_data_grouped
+
+	
+	
+def format_data(sunspot_data):
+	final_columns_order = ['YYYY min', 'CarringtonRotation min','NOAA','JulianDay min','JulianDay max','CorrectedWholeSpotArea sum', 
+						   'LongitudeAverage','LatitudeAverage','PositionOnDisk min','PositionOnDisk max','Longitude min', 
+						   'Longitude max','LongitudeRange','Latitude min','Latitude max','LatitudeRange']
+	final_columns_names = ['Year', 'CarringtonRotation', 'NOAA','StartJulianDay','EndJulianDay','TotalGroupArea',
+						   'WeightedLongitude', 'WeightedLatitude','StartPosition','EndPosition','MinLongitude',
+						   'MaxLongitude','LongitudeRange', 'MinLatitude','MaxLatitude','LatitudeRange']
+	
+	sunspot_data.columns = [' '.join(column_name).strip() for column_name in sunspot_data.columns.values]
+	sunspot_data.reset_index(inplace=True)
+	
+	sunspot_data_final = sunspot_data[final_columns_order]
+	sunspot_data_final.columns = final_columns_names
+	
+	return sunspot_data_final
+
+	
+	
+def validate_final(sunspot_data):
+	sunspot_data_records = sunspot_data.shape[0]
+	for record_position in range(sunspot_data_records):
+		noaa = sunspot_data.at[record_position,'NOAA']
+		total_area = sunspot_data.at[record_position,'TotalGroupArea']
+		start_position = sunspot_data.at[record_position,'StartPosition']
+		end_position = sunspot_data.at[record_position,'EndPosition']
+		minimum_longitude = sunspot_data.at[record_position,'MinLongitude']
+		maximum_longitude = sunspot_data.at[record_position,'MaxLongitude']
+		minimum_latitude = sunspot_data.at[record_position,'MinLatitude']
+		maximum_latitude = sunspot_data.at[record_position,'MaxLatitude']
+		longitude_range = sunspot_data.at[record_position,'LongitudeRange']
+		latitude_range = sunspot_data.at[record_position,'LatitudeRange']
+
+		if total_area < 0 or total_area >= 999999:
+			return "Niepoprawne dane - sumaryczna powierzchnia: " + total_area + " dla grupy: " + noaa
+		elif start_position < 0 or start_position > 1:
+			return "Niepoprawne dane - miejsce pojawienia na tarczy: " + str(start_position) + " dla grupy: " + noaa
+		elif end_position < 0 or end_position > 1:
+			return "Niepoprawne dane - miejsce zaniku na tarczy: " + str(end_position) + " dla grupy: " + noaa
+		elif minimum_longitude < 0 or minimum_longitude > 360:
+			return "Niepoprawne dane - długość heliograficzna: " + minimum_longitude + " dla grupy: " + noaa
+		elif maximum_longitude < 0 or maximum_longitude > 360:
+			return "Niepoprawne dane - długość heliograficzna: " + maximum_longitude + " dla grupy: " + noaa
+		elif minimum_latitude < -180 or minimum_latitude > 180:
+			return "Niepoprawne dane - szeYearość heliograficzna: " + minimum_latitude + " dla grupy: " + noaa
+		elif maximum_latitude < -180 or maximum_latitude > 180:
+			return "Niepoprawne dane - szeYearość heliograficzna: " + maximum_latitude + " dla grupy: " + noaa
+		elif longitude_range < 0 or longitude_range > 360:
+			return "Niepoprawne dane - długość heliograficzna: " + maximum_longitude + " dla grupy: " + noaa
+		elif latitude_range < 0 or latitude_range > 360:
+			return "Niepoprawne dane - szeYearość heliograficzna: " + maximum_latitude + " dla grupy: " + noaa
+	
 	
 main()
+
 
 
