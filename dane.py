@@ -6,26 +6,44 @@ from astropy.time import Time
 
 
 def main():
-	columns_names = ["DataType","YYYY","MM","DD","HH","mm","ss","NOAA","UmbraArea","WholeSpotArea", "CorrectedUmbraArea",
-					 "CorrectedWholeSpotArea", "Latitude","Longitude", "LongitudinalDistance","PositionAngle","DistanceFromCentre"]
-	sunspot_data = pd.read_fwf('gDPD1978aa.txt', header=None, names=columns_names)
-	sunspot_data = validate_input(sunspot_data)	
+	file_name = 'gDPD1978bb'
+	file_name = 'alldataDPD'
+	input_file_name = file_name + '.txt'
+	#input_file_name = 'alldataDPD.txt'
+	output_file_name = file_name + '_modified.txt'
+	output_file_name_clear = file_name + '_clear.txt'
+	output_file_name_longitude = file_name + '_longitudelimit.txt'
+	output_file_name_latitude = file_name + '_latitudelimit.txt'
 	
+	columns_names = ['DataType','YYYY','MM','DD','HH','mm','ss','NOAA','UmbraArea','WholeSpotArea', 'CorrectedUmbraArea',
+					 'CorrectedWholeSpotArea', 'Latitude','Longitude', 'LongitudinalDistance','PositionAngle','DistanceFromCentre']
+	columns_positions = [(0, 1), (2, 6), (7, 9), (10, 12), (13, 15), (16, 18), (19, 21), (22, 28), (35, 40), (41, 46), (47, 52), (53, 58), (59, 65), (66, 72), (73, 79), (80, 86), (87, 93)]
+	sunspot_data = pd.read_fwf(input_file_name, header=None, names=columns_names, colspecs=columns_positions)
+	sunspot_data = validate_input(sunspot_data)	
 	sunspot_data = add_data(sunspot_data)
-
+	columns_names_extended = ['DataType', 'YYYY', 'MM', 'DD', 'HH', 'mm', 'ss', 'NOAA', 'UmbraArea', 'WholeSpotArea', 'CorrectedUmbraArea', 
+						   'CorrectedWholeSpotArea', 'Latitude', 'Longitude', 'LongitudinalDistance', 'PositionAngle', 'DistanceFromCentre', 
+						   'JulianDay', 'Longitude*Area', 'Latitude*Area', 'PositionOnDisk', 'CarringtonRotation']
+	sunspot_data.to_csv( output_file_name_clear, sep='	', header = columns_names_extended, index = None )
+	
 	sunspot_data_grouped = get_average(sunspot_data)
 	del(sunspot_data)
-
+	
 	sunspot_data_final = format_data(sunspot_data_grouped)
 	del(sunspot_data_grouped)
 	
-	error_message = validate_final(sunspot_data_final)
-	if error_message: 
-		print (error_message)
+	incorrect_data = validate_final(sunspot_data_final)
+	if incorrect_data: 
+		[print('Niepoprawne dane - %s: %s dla grupy: %s' % data) for data in incorrect_data]
 	else:
-		sunspot_data_final.to_csv('output1aa.txt', sep='	', header = None, index = None)
-		
+		sunspot_data_final.to_csv( output_file_name, sep='	', header = None, index = None )
 
+	sunspot_data_longitude_range = get_not_in_limit(sunspot_data_final, column_name = 'LongitudeRange', limit = 15)
+	sunspot_data_latitude_range = get_not_in_limit(sunspot_data_final, column_name = 'LatitudeRange', limit = 7)
+	
+	sunspot_data_longitude_range.to_csv( output_file_name_longitude, sep='	', header = None, index = None )
+	sunspot_data_latitude_range.to_csv( output_file_name_latitude, sep='	', header = None, index = None )
+	
 
 def validate_input(sunspot_data):
 	corrected_sunspot_data = remove_invalid(sunspot_data)
@@ -42,8 +60,8 @@ def remove_invalid(sunspot_data):
 	
 	
 def correct_seconds(sunspot_data):
-	sunspot_data.loc[sunspot_data['ss'] == 60, "mm"] += 1
-	sunspot_data.loc[sunspot_data['ss'] == 60, "ss"] = 0
+	sunspot_data.loc[sunspot_data['ss'] == 60, 'mm'] += 1
+	sunspot_data.loc[sunspot_data['ss'] == 60, 'ss'] = 0
 	return sunspot_data
 	
 		
@@ -58,7 +76,6 @@ def add_data(sunspot_data):
 	
 	
 def get_julian_day(date):
-	# wyznacz dzień juliański dla danej daty
 	year = date['YYYY']
 	month = date['MM']
 	day = date['DD']
@@ -90,7 +107,7 @@ def get_starts():
 	
 	with open('carrington.txt','r') as input_file:
 		for line in input_file:
-			rotation_number, julian_day = line.split("\t")
+			rotation_number, julian_day = line.split('\t')
 			rotations_numbers.append(int(rotation_number))
 			julian_days.append(float(julian_day))
 	
@@ -139,6 +156,7 @@ def format_data(sunspot_data):
 	
 def validate_final(sunspot_data):
 	sunspot_data_records = sunspot_data.shape[0]
+	incorrect_data = []
 	for record_position in range(sunspot_data_records):
 		noaa = sunspot_data.at[record_position,'NOAA']
 		total_area = sunspot_data.at[record_position,'TotalGroupArea']
@@ -150,28 +168,33 @@ def validate_final(sunspot_data):
 		maximum_latitude = sunspot_data.at[record_position,'MaxLatitude']
 		longitude_range = sunspot_data.at[record_position,'LongitudeRange']
 		latitude_range = sunspot_data.at[record_position,'LatitudeRange']
-
+		
 		if total_area < 0 or total_area >= 999999:
-			return "Niepoprawne dane - sumaryczna powierzchnia: " + total_area + " dla grupy: " + noaa
-		elif start_position < 0 or start_position > 1:
-			return "Niepoprawne dane - miejsce pojawienia na tarczy: " + str(start_position) + " dla grupy: " + noaa
-		elif end_position < 0 or end_position > 1:
-			return "Niepoprawne dane - miejsce zaniku na tarczy: " + str(end_position) + " dla grupy: " + noaa
-		elif minimum_longitude < 0 or minimum_longitude > 360:
-			return "Niepoprawne dane - długość heliograficzna: " + minimum_longitude + " dla grupy: " + noaa
-		elif maximum_longitude < 0 or maximum_longitude > 360:
-			return "Niepoprawne dane - długość heliograficzna: " + maximum_longitude + " dla grupy: " + noaa
-		elif minimum_latitude < -180 or minimum_latitude > 180:
-			return "Niepoprawne dane - szeYearość heliograficzna: " + minimum_latitude + " dla grupy: " + noaa
-		elif maximum_latitude < -180 or maximum_latitude > 180:
-			return "Niepoprawne dane - szeYearość heliograficzna: " + maximum_latitude + " dla grupy: " + noaa
-		elif longitude_range < 0 or longitude_range > 360:
-			return "Niepoprawne dane - długość heliograficzna: " + maximum_longitude + " dla grupy: " + noaa
-		elif latitude_range < 0 or latitude_range > 360:
-			return "Niepoprawne dane - szeYearość heliograficzna: " + maximum_latitude + " dla grupy: " + noaa
+			incorrect_data.append(('sumaryczna powierzchnia', total_area, noaa))
+		if start_position < 0 or start_position > 1:
+			incorrect_data.append(('miejsce pojawienia na tarczy', start_position, noaa))
+		if end_position < 0 or end_position > 1:
+			incorrect_data.append(('miejsce zaniku na tarczy', end_position, noaa))
+		if minimum_longitude < 0 or minimum_longitude > 360:
+			incorrect_data.append(('długość heliograficzna', minimum_longitude, noaa))
+		if maximum_longitude < 0 or maximum_longitude > 360:
+			incorrect_data.append(('długość heliograficzna', maximum_longitude, noaa))
+		if minimum_latitude < -180 or minimum_latitude > 180:
+			incorrect_data.append(('szerokość heliograficzna', minimum_latitude, noaa))
+		if maximum_latitude < -180 or maximum_latitude > 180:
+			incorrect_data.append(('szerokość heliograficzna', maximum_latitude, noaa))
+		if longitude_range < 0 or longitude_range > 360:
+			incorrect_data.append(('długość heliograficzna', maximum_longitude, noaa))
+		if latitude_range < 0 or latitude_range > 360:
+			incorrect_data.append(('szerokość heliograficzna', maximum_latitude, noaa))
+		
+	return incorrect_data
+		
+	
+def get_not_in_limit(sunspot_data, column_name, limit):
+	sunspot_data_exceeded_limit = sunspot_data[(sunspot_data[column_name] > limit)]
+	return sunspot_data_exceeded_limit
 	
 	
 main()
-
-
 
