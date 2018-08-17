@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 
 import pandas as pd
 from datetime import datetime
@@ -12,8 +12,11 @@ def main():
 	#input_file_name = 'alldataDPD.txt'
 	output_file_name = file_name + '_modified.txt'
 	output_file_name_clear = file_name + '_clear.txt'
-	output_file_name_longitude = file_name + '_longitudelimit.txt'
-	output_file_name_latitude = file_name + '_latitudelimit.txt'
+	output_file_name_longitude = file_name + '_longitudelimit2.txt'
+	output_file_name_latitude = file_name + '_latitudelimit2.txt'
+	output_file_name_inlimit = file_name + '_modified_inlimit.txt'
+	latitude_limit = 15
+	longitude_limit = 30
 	
 	columns_names = ['DataType','YYYY','MM','DD','HH','mm','ss','NOAA','UmbraArea','WholeSpotArea', 'CorrectedUmbraArea',
 					 'CorrectedWholeSpotArea', 'Latitude','Longitude', 'LongitudinalDistance','PositionAngle','DistanceFromCentre']
@@ -26,7 +29,7 @@ def main():
 						   'JulianDay', 'Longitude*Area', 'Latitude*Area', 'PositionOnDisk', 'CarringtonRotation']
 	sunspot_data.to_csv( output_file_name_clear, sep='	', header = columns_names_extended, index = None )
 	
-	sunspot_data_grouped = get_average(sunspot_data)
+	sunspot_data_grouped = group_data(sunspot_data)
 	del(sunspot_data)
 	
 	sunspot_data_final = format_data(sunspot_data_grouped)
@@ -37,17 +40,20 @@ def main():
 		[print('Niepoprawne dane - %s: %s dla grupy: %s' % data) for data in incorrect_data]
 	else:
 		sunspot_data_final.to_csv( output_file_name, sep='	', header = None, index = None )
-
-	sunspot_data_longitude_range = get_not_in_limit(sunspot_data_final, column_name = 'LongitudeRange', limit = 15)
-	sunspot_data_latitude_range = get_not_in_limit(sunspot_data_final, column_name = 'LatitudeRange', limit = 7)
+	
+	sunspot_data_longitude_range = get_not_in_limit(sunspot_data_final, column_name = 'LongitudeRange', limit = longitude_limit)
+	sunspot_data_latitude_range = get_not_in_limit(sunspot_data_final, column_name = 'LatitudeRange', limit = latitude_limit)
+	sunspot_data_in_limit = get_in_limit(sunspot_data_final, column_names = ['LongitudeRange', 'LatitudeRange'], limits = [longitude_limit,latitude_limit])
 	
 	sunspot_data_longitude_range.to_csv( output_file_name_longitude, sep='	', header = None, index = None )
 	sunspot_data_latitude_range.to_csv( output_file_name_latitude, sep='	', header = None, index = None )
+	sunspot_data_in_limit.to_csv( output_file_name_inlimit, sep='	', header = None, index = None )
 	
 
 def validate_input(sunspot_data):
 	corrected_sunspot_data = remove_invalid(sunspot_data)
 	corrected_sunspot_data = correct_seconds(corrected_sunspot_data)
+	corrected_sunspot_data = correct_longitudinal_distance(corrected_sunspot_data)
 	return corrected_sunspot_data
 	
 	
@@ -64,7 +70,11 @@ def correct_seconds(sunspot_data):
 	sunspot_data.loc[sunspot_data['ss'] == 60, 'ss'] = 0
 	return sunspot_data
 	
-		
+def correct_longitudinal_distance(sunspot_data):
+	sunspot_data.loc[sunspot_data['LongitudinalDistance'] < -90, 'LongitudinalDistance'] = -90
+	sunspot_data.loc[sunspot_data['LongitudinalDistance'] > 90, 'LongitudinalDistance'] = 90
+	return sunspot_data
+	
 	
 def add_data(sunspot_data):
 	sunspot_data['JulianDay'] = sunspot_data.apply(get_julian_day, axis=1)
@@ -122,19 +132,51 @@ def get_current( julian_day, rotations_start_days ):
 			return rotations_numbers[iterator]
 		
 		
-		
-def get_average(sunspot_data):
+def group_data(sunspot_data):
+	sunspot_data = fix_longitude(sunspot_data)
+			
 	sunspot_data_grouped = sunspot_data.groupby('NOAA').agg({'YYYY': 'min', 'CarringtonRotation': 'min','PositionOnDisk': ['min', 'max'],
 															 'Longitude': ['min', 'max'],'Latitude': ['min', 'max'],'JulianDay': ['min', 'max'], 
 															 'CorrectedWholeSpotArea': 'sum', 'Longitude*Area': 'sum', 'Latitude*Area': 'sum'})
 	
+	sunspot_data_grouped = get_range(sunspot_data_grouped)
+	sunspot_data_grouped = get_average(sunspot_data_grouped)
+	sunspot_data_grouped = recalculate_longitude(sunspot_data_grouped)
+	
+	return sunspot_data_grouped
+
+def fix_longitude(sunspot_data):	
+	sunspot_data_grouped = sunspot_data.groupby('NOAA').agg({'YYYY': 'min', 'CarringtonRotation': 'min','PositionOnDisk': ['min', 'max'],
+															 'Longitude': ['min', 'max'],'Latitude': ['min', 'max'],'JulianDay': ['min', 'max'], 
+															 'CorrectedWholeSpotArea': 'sum', 'Longitude*Area': 'sum', 'Latitude*Area': 'sum'})
+	
+	sunspot_data_grouped_incorrect = sunspot_data_grouped[ (sunspot_data_grouped['Longitude']['max'] > 270) & (sunspot_data_grouped['Longitude']['min'] < 90) ]
+	incorrect_groups = sunspot_data_grouped_incorrect.index
+	
+	for group in incorrect_groups:
+		sunspot_data.loc[(sunspot_data['NOAA'] == group) & (sunspot_data['Longitude'] > 270), 'Longitude'] -= 360 
+	
+	return sunspot_data
+		
+		
+def get_range(sunspot_data_grouped):
 	sunspot_data_grouped['LongitudeRange'] = sunspot_data_grouped['Longitude']['max'] - sunspot_data_grouped['Longitude']['min']
 	sunspot_data_grouped['LatitudeRange'] = sunspot_data_grouped['Latitude']['max'] - sunspot_data_grouped['Latitude']['min']
+	return sunspot_data_grouped
+	
+				
+def get_average(sunspot_data_grouped):
 	sunspot_data_grouped['LongitudeAverage'] = sunspot_data_grouped['Longitude*Area']['sum'] / sunspot_data_grouped['CorrectedWholeSpotArea']['sum']
 	sunspot_data_grouped['LatitudeAverage'] = sunspot_data_grouped['Latitude*Area']['sum'] / sunspot_data_grouped['CorrectedWholeSpotArea']['sum']
 	return sunspot_data_grouped
 
+
+def recalculate_longitude(sunspot_data_grouped):
+	sunspot_data_grouped.loc[sunspot_data_grouped['Longitude']['min'] < 0, ('Longitude', 'min')] += 360
+	sunspot_data_grouped.loc[sunspot_data_grouped['Longitude']['min'] < 0, ('Longitude', 'min')] += 360
+	return sunspot_data_grouped
 	
+		
 	
 def format_data(sunspot_data):
 	final_columns_order = ['YYYY min', 'CarringtonRotation min','NOAA','JulianDay min','JulianDay max','CorrectedWholeSpotArea sum', 
@@ -196,5 +238,9 @@ def get_not_in_limit(sunspot_data, column_name, limit):
 	return sunspot_data_exceeded_limit
 	
 	
+def get_in_limit(sunspot_data, column_names, limits):
+	sunspot_data_in_limit = sunspot_data[(sunspot_data[column_names[0]] <= limits[0]) & (sunspot_data[column_names[1]] <= limits[1])]
+	return sunspot_data_in_limit
+
 main()
 
