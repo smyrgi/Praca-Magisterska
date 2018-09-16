@@ -63,7 +63,6 @@ def validate_exceeded_data(coordinate, sunspot_data_daily, group):
 
 	if records_number < 3: 
 		return 'remove group data', None
-		group_data_sorted_fixed = [group_data.drop(group_data.index[record]) for record in range(records_number)]
 	else:
 		value_to_remove = test_outliners(coordinate, group_data_sorted, records_number)
 		if (value_to_remove):
