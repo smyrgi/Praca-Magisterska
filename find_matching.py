@@ -26,7 +26,7 @@ def main():
 	
 	data_on_east = data_on_east.sort_values(by='StartJulianDay')
 	data_on_west = data_on_west.sort_values(by='EndJulianDay')
-	data_on_west['ExpectedStartJulianDay'] = data_on_west['EndJulianDay'] + get_rotation_period(data_on_west['WeightedLatitude'])
+	data_on_west['ExpectedStartJulianDay'] = data_on_west['EndJulianDay'] + get_half_rotation_period(data_on_west['WeightedLatitude'])
 	
 	groups_matched = get_matched_groups(data_on_west, data_on_east)
 
@@ -41,11 +41,11 @@ def main():
 	
 		
 		
-def get_rotation_period(latitude_value):
+def get_half_rotation_period(latitude_value):
 	dt = 1 * u.day
 	latitude = u.Quantity(latitude_value, 'deg')
 	rotation_rate = diff_rot(dt, latitude) / dt 
-	rotation_period = 360 * u.deg / rotation_rate
+	rotation_period = 180 * u.deg / rotation_rate
 	return rotation_period.value
 	
 	
@@ -66,7 +66,7 @@ def get_matched_groups(data_on_west, data_on_east):
 	
 	
 def approximately_equal(value1, value2, precision = 1):
-	if (value1 - precision) < value2 < (value1 + precision):
+	if (abs(value1 - value2) < precision):
 		return True
 	return False
 		
