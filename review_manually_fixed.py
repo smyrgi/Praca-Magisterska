@@ -65,19 +65,15 @@ def check_t_student_test(n, group_data_after_fix, group_data_removed, coordinate
 	removed_value = group_data_removed.at[removed_record, coordinate]
 
 	mean = np.mean(list(group_data_after_fix[coordinate]))
-	t_critical = t.ppf(1-0.025, n-2)
+	t_critical = t.ppf(1-0.025, n-1)
 	s = np.std(list(group_data_after_fix[coordinate]))
 	
-	g_min = mean - t_critical * math.sqrt(n/(n-2))*s
-	g_max = mean + t_critical * math.sqrt(n/(n-2))*s
+	t_calculated = abs(removed_value - mean) * math.sqrt(n-1) / s
 	
-	if (removed_value < g_min or removed_value > g_max):
+	if (t_calculated > t_critical):
 		return True
 	return False
-
 	
 
 main()
-	
-	
 	
