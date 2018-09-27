@@ -24,6 +24,8 @@ def main():
 	#data_on_east = data_on_east.sort_values(by='StartJulianDay')
 	data_not_disappearing = data_not_disappearing.sort_values(by='CenterJulianDay')
 	data_not_disappearing['ExpectedCenterJulianDay'] = data_not_disappearing['CenterJulianDay'] + get_rotation_period(data_not_disappearing['WeightedLatitude'])
+	data_not_disappearing['CenterJulianDay'] = data_not_disappearing['CenterJulianDay'].astype(int)
+	data_not_disappearing['ExpectedCenterJulianDay'] = data_not_disappearing['ExpectedCenterJulianDay'].astype(int)
 	
 	groups_matched = get_matched_groups(data_not_disappearing, sunspot_data)
 
@@ -50,25 +52,15 @@ def get_rotation_period(latitude_value):
 def get_matched_groups(data_not_disappearing, sunspot_data): #groups_matched.append([group_data_not_disappearing['NOAA'], group_data_on_east['NOAA']])
 	groups_matched = []
 	for index_west, group_data_not_disappearing in data_not_disappearing.iterrows():
-		for index_east, group_data in sunspot_data.iterrows():
-			if (check_same_day(group_data_not_disappearing['ExpectedCenterJulianDay'], group_data['CenterJulianDay'])):
-				# times matched
-				if (check_close_position(group_data_not_disappearing, group_data)):
-					# latitude matched
-					groups_matched.append([group_data_not_disappearing['NOAA'], group_data['NOAA']])
-					break
-			elif (group_data_not_disappearing['ExpectedCenterJulianDay'] < group_data['CenterJulianDay']):
-				# times not matched
+		data_recurrent = sunspot_data.loc[abs(sunspot_data['CenterJulianDay'] - group_data_not_disappearing['ExpectedCenterJulianDay']) < 1]
+		# times matched
+		for index_east, group_data in data_recurrent.iterrows():
+			if (check_close_position(group_data_not_disappearing, group_data)):
+				# latitude matched
+				groups_matched.append([group_data_not_disappearing['NOAA'], group_data['NOAA']])
 				break
-		
 	return groups_matched
-	
-	
-def check_same_day(value1, value2):
-	if (abs(value1 - value2) < 1): #1 dzień
-		return True
-	return False
-		
+
 	
 def check_close_position(group_data1, group_data2):
 	precision_longitude = 10
