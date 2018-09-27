@@ -22,10 +22,11 @@ def output_data(sunspot_data, output_file_name):
 def group_data(sunspot_data):
 	sunspot_data = fix_longitude(sunspot_data)
 			
-	sunspot_data_grouped = sunspot_data.groupby('NOAA').agg({'YYYY': 'min', 'CarringtonRotation': 'min','PositionOnDisk': ['min', 'max'],
-															 'Longitude': ['min', 'max'],'Latitude': ['min', 'max'],'JulianDay': ['min', 'max'], 
+	sunspot_data_grouped = sunspot_data.groupby('NOAA').agg({'YYYY': 'min', 'CarringtonRotation': 'min','PositionOnDisk': ['min', 'max',get_center_position],
+															 'Longitude': ['min', 'max'],'Latitude': ['min', 'max'],'JulianDay': 
+															 ['min', 'max', lambda group: get_center_time(sunspot_data.loc[group.index])], 
 															 'CorrectedWholeSpotArea': 'sum', 'Longitude*Area': 'sum', 'Latitude*Area': 'sum'})
-	
+
 	sunspot_data_grouped = validate_area(sunspot_data_grouped)
 	sunspot_data_grouped = get_range(sunspot_data_grouped)
 	sunspot_data_grouped = get_average(sunspot_data_grouped)
@@ -46,7 +47,18 @@ def fix_longitude(sunspot_data):
 		sunspot_data.loc[(sunspot_data['NOAA'] == group) & (sunspot_data['Longitude'] > 270), 'Longitude'] -= 360 
 	
 	return sunspot_data
-		
+
+				
+def get_center_position(sunspot_data_positions):
+	center_position = sunspot_data_positions.iloc[(sunspot_data_positions-0.5).abs().argsort()[:1]]
+	return center_position
+
+
+def get_center_time(group_data): #,lambda g: get_center_time(sunspot_data.loc[g.index])
+	group_data_center = group_data.iloc[(group_data['PositionOnDisk']-0.5).abs().argsort()[:1]]
+	center_time = group_data_center['JulianDay']
+	return center_time
+	
 	
 def validate_area(sunspot_data_grouped):
 	sunspot_data_grouped_corrected = sunspot_data_grouped[sunspot_data_grouped['CorrectedWholeSpotArea']['sum'] != 0]
@@ -73,13 +85,13 @@ def recalculate_longitude(sunspot_data_grouped):
 		
 	
 def format_data(sunspot_data):
-	final_columns_order = ['YYYY min', 'CarringtonRotation min','NOAA','JulianDay min','JulianDay max','CorrectedWholeSpotArea sum', 
-						   'LongitudeAverage','LatitudeAverage','PositionOnDisk min','PositionOnDisk max','Longitude min', 
-						   'Longitude max','LongitudeRange','Latitude min','Latitude max','LatitudeRange']
+	final_columns_order = ['YYYY min', 'CarringtonRotation min', 'NOAA', 'JulianDay min', 'JulianDay max', 'CorrectedWholeSpotArea sum', 
+						   'LongitudeAverage', 'LatitudeAverage', 'PositionOnDisk min', 'PositionOnDisk max', 'Longitude min', 'Longitude max',
+						   'LongitudeRange', 'Latitude min', 'Latitude max', 'LatitudeRange', 'PositionOnDisk get_center_position', 'JulianDay <lambda>']
 	
-	final_columns_names = ['Year', 'CarringtonRotation', 'NOAA','StartJulianDay','EndJulianDay','TotalGroupArea',
-						   'WeightedLongitude', 'WeightedLatitude','StartPosition','EndPosition','MinLongitude',
-						   'MaxLongitude','LongitudeRange', 'MinLatitude','MaxLatitude','LatitudeRange']
+	final_columns_names = ['Year', 'CarringtonRotation', 'NOAA', 'StartJulianDay', 'EndJulianDay', 'TotalGroupArea',
+						   'WeightedLongitude', 'WeightedLatitude', 'StartPosition', 'EndPosition', 'MinLongitude', 'MaxLongitude',
+						   'LongitudeRange', 'MinLatitude', 'MaxLatitude', 'LatitudeRange', 'CenterPosition', 'CenterJulianDay']
 	
 	sunspot_data.columns = [' '.join(column_name).strip() for column_name in sunspot_data.columns.values]
 	sunspot_data.reset_index(inplace=True)
