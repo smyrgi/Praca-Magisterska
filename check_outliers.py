@@ -6,7 +6,7 @@ import output_grouped_data
 def main():
 	input_file_name_latitude = 'groupdata_latitudelimit.txt'
 	input_file_name_longitude = 'groupdata_longitudelimit.txt'
-	input_file_name_daily = 'alldataDPD_clear.txt'
+	input_file_name_daily = 'dailydata_allDPD_clear.txt'
 	output_file_name_manually_groups = 'checkmanually_groups.txt'
 	output_file_name_manually_data = 'checkmanually_data.txt'
 	output_file_name_fixed = 'groupdata_fixedlimits.txt'
