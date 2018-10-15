@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 
 import pandas as pd
 from datetime import datetime
@@ -7,7 +7,7 @@ import output_grouped_data
 
 
 def main():
-	file_name = 'alldataDPD'
+	file_name = 'dailydata_allDPD'
 	input_file_name = file_name + '.txt'
 	output_file_name_clear = file_name + '_clear.txt'
 	output_file_name_grouped = 'groupdata_modified.txt'
