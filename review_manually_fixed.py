@@ -11,11 +11,21 @@ def main():
 	input_file_name_before_fix = 'checkmanually_data.txt'
 	input_file_name_after_fix = 'checkmanually_data_fixed.txt'
 	output_file_name = 'groupdata_modified_manually.txt'
+	output_file_name_daily = 'dailydata_modified_manually.txt'
 	
 	sunspot_data_before_fix = pd.read_table(input_file_name_before_fix, header=0)
 	sunspot_data_after_fix = pd.read_table(input_file_name_after_fix, header=0)
 	
 	sunspot_data_tested = validate_fixed_data(sunspot_data_before_fix, sunspot_data_after_fix)
+		
+	columns_names = ['DataType', 'YYYY', 'MM', 'DD', 'HH', 'mm', 'ss', 'NOAA', 'UmbraArea', 'WholeSpotArea', 'CorrectedUmbraArea', 
+						   'CorrectedWholeSpotArea', 'Latitude', 'Longitude', 'LongitudinalDistance', 'PositionAngle', 'DistanceFromCentre', 
+						   'JulianDay', 'Longitude*Area', 'Latitude*Area', 'PositionOnDisk', 'CarringtonRotation']
+	
+	sunspot_data_tested = sunspot_data_tested[columns_names]
+	sunspot_data_tested.columns = columns_names
+	
+	sunspot_data_tested.to_csv( output_file_name_daily, sep='	', header = columns_names, index = None )
 	
 	sunspot_data_final, final_columns_names = output_grouped_data.output_data(sunspot_data_tested, output_file_name)
 			
@@ -38,7 +48,7 @@ def validate_group_data(sunspot_data_before_fix, sunspot_data_after_fix, group):
 
 	ind_data_removed_correctly = test_removed_data(group_data_before_fix, group_data_after_fix)
 
-	if (ind_data_removed_correctly):
+	if (ind_data_removed_correctly or group_data_after_fix.empty):
 		return group_data_after_fix
 	else:
 		return group_data_before_fix
