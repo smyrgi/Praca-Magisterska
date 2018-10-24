@@ -128,10 +128,8 @@ def validate_final(sunspot_data):
 			incorrect_data.append(('długość heliograficzna', minimum_longitude, noaa))
 		if maximum_longitude < 0 or maximum_longitude > 360:
 			incorrect_data.append(('długość heliograficzna', maximum_longitude, noaa))
-		if minimum_latitude < -180 or minimum_latitude > 180:
-			incorrect_data.append(('szerokość heliograficzna', minimum_latitude, noaa))
-		if maximum_latitude < -180 or maximum_latitude > 180:
-			incorrect_data.append(('szerokość heliograficzna', maximum_latitude, noaa))
+		if not [(minimum_latitude > -40 and maximum_latitude < 5) or (minimum_latitude > -5 and maximum_latitude < 40)]:
+			incorrect_data.append(('szerokość heliograficzna', maximum_latitude, noaa))			
 		if longitude_range < 0 or longitude_range > 360:
 			incorrect_data.append(('długość heliograficzna', maximum_longitude, noaa))
 		if latitude_range < 0 or latitude_range > 360:
