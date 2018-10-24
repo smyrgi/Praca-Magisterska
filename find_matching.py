@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
 import pandas as pd
-import astropy.units as u
-from sunpy.physics.differential_rotation import diff_rot
 
 	
 def main():		
 	input_file_name_fixedlimits = 'groupdata_fixedlimits.txt'
 	input_file_name_manually = 'groupdata_modified_manually.txt'
 	output_file_name_groups = 'matched_groups.txt'
+	carringtonRotation = 27.2753
 	
 	sunspot_data_fixedlimits = pd.read_table(input_file_name_fixedlimits, header=0)
 	sunspot_data_manually = pd.read_table(input_file_name_manually, header=0)
@@ -19,9 +18,7 @@ def main():
 	
 	data_not_disappearing = sunspot_data.loc[sunspot_data['EndPosition'] > 0.8]
 	data_not_disappearing = data_not_disappearing.sort_values(by='CenterJulianDay')
-	data_not_disappearing['ExpectedCenterJulianDay'] = data_not_disappearing['CenterJulianDay'] + 27.2753
-	data_not_disappearing['CenterJulianDay'] = data_not_disappearing['CenterJulianDay']
-	data_not_disappearing['ExpectedCenterJulianDay'] = data_not_disappearing['ExpectedCenterJulianDay']
+	data_not_disappearing['ExpectedCenterJulianDay'] = data_not_disappearing['CenterJulianDay'] + carringtonRotation
 	
 	groups_matched = get_matched_groups(data_not_disappearing, sunspot_data)
 
@@ -32,7 +29,7 @@ def main():
 	
 def get_matched_groups(data_not_disappearing, sunspot_data): 
 	groups_matched = []
-	for index_west, group_data_not_disappearing in data_not_disappearing.iterrows():
+	for index, group_data_not_disappearing in data_not_disappearing.iterrows():
 		data_recurrent = sunspot_data.loc[abs(sunspot_data['CenterJulianDay'] - group_data_not_disappearing['ExpectedCenterJulianDay']) < 1]
 		# times matched
 		for index_east, group_data in data_recurrent.iterrows():
