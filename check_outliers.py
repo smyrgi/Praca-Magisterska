@@ -10,6 +10,7 @@ def main():
 	output_file_name_manually_groups = 'checkmanually_groups.txt'
 	output_file_name_manually_data = 'checkmanually_data.txt'
 	output_file_name_fixed = 'groupdata_fixedlimits.txt'
+	output_file_name_fixed_data = 'dailydata_fixed_dixon.txt'
 
 	sunspot_data_daily = pd.read_table(input_file_name_daily, header=0)
 	sunspot_data_fixed = sunspot_data_daily
@@ -34,6 +35,8 @@ def main():
 	data_check_manually = sunspot_data_daily.loc[sunspot_data_daily['NOAA'].isin(list(groups_check_manually))]
 	data_check_manually = data_check_manually.sort_values(by='NOAA')
 	data_check_manually.to_csv( output_file_name_manually_data, sep='	', header = columns_names_daily, index = None )
+	
+	sunspot_data_fixed.to_csv( output_file_name_fixed_data, sep='	', header = columns_names_daily, index = None )
 	
 	sunspot_data_final, final_columns_names = output_grouped_data.output_data(sunspot_data_fixed, output_file_name_fixed)
 
