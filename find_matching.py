@@ -14,17 +14,17 @@ def main():
 	
 	
 def find_matching(input_file_name, output_file_name):
-	sunspot_data = pd.read_table(input_file_name, header=0)		
+	sunspot_data = pd.read_fwf(input_file_name, header=0)
 	sunspot_data = sunspot_data.sort_values(by='StartJulianDay')
 	
 	data_not_disappearing = sunspot_data.loc[sunspot_data['EndPosition'] > 0.8]
 	data_not_disappearing = data_not_disappearing.sort_values(by='StartJulianDay')
 	
 	groups_matched = get_matched_groups(data_not_disappearing, sunspot_data)
-
+	
 	with open(output_file_name, 'w') as ofile:
-		for match in groups_matched:
-			ofile.write('\t'.join(match)+'\n')
+		groups_matched_df = pd.DataFrame(groups_matched)
+		ofile.write(groups_matched_df.to_string(header = None, index = None ))
 		
 	
 def get_matched_groups(data_not_disappearing, sunspot_data): 
