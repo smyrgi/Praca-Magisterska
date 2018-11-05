@@ -93,12 +93,22 @@ def output_data(sunspot_data):
 	
 	sunspot_data_fixedlimits = pd.read_table(input_file_name, header=0)
 	sunspot_data_final = sunspot_data_final.append(sunspot_data_fixedlimits, ignore_index=True)
+	
+	sunspot_data_final.loc[:,['StartJulianDay','EndJulianDay']] = sunspot_data_final.loc[:,['StartJulianDay','EndJulianDay']].astype(int)
+	rounding = {'WeightedLongitude': 2, 'WeightedLatitude': 2,
+				'StartPosition': 3, 'EndPosition': 3,
+				'LongitudeRange': 2, 'LatitudeRange': 2}
+	sunspot_data_final = sunspot_data_final.round(rounding)
+		
 	sunspot_data_final_north = sunspot_data_final.loc[sunspot_data_final['WeightedLatitude'] >= 0]
 	sunspot_data_final_south = sunspot_data_final.loc[sunspot_data_final['WeightedLatitude'] < 0]
+		
+	with open(output_file_name_north, 'w') as ofile: 
+		ofile.write(sunspot_data_final_north.to_string(header = final_columns_names, index = None ))
+		
+	with open(output_file_name_south, 'w') as ofile: 
+		ofile.write(sunspot_data_final_south.to_string(header = final_columns_names, index = None ))
 	
-	sunspot_data_final_north.to_csv( output_file_name_north, sep='	', header = final_columns_names, index = None )
-	sunspot_data_final_south.to_csv( output_file_name_south, sep='	', header = final_columns_names, index = None )
 	
-
 main()
 	
