@@ -27,7 +27,7 @@ def output_matched_groups_data(sunspot_data, input_file_name, output_file_name):
 	
 	with open(output_file_name, 'a') as ofile:
 		for row in matched_groups:
-			row_list = row.split("\t")
+			row_list = row.split()
 			group1 = row_list[3]
 			group2 = row_list[4]
 
