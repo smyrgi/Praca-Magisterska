@@ -29,13 +29,16 @@ def find_matching(input_file_name, output_file_name):
 	
 def get_matched_groups(data_not_disappearing, sunspot_data): 
 	groups_matched = []
+	precisions_latitude = [1,2,3]
+	precisions_longitude = [5,10,15]
+	precisions = [[x, y] for x in precisions_latitude for y in precisions_longitude]
+	
 	for index_not_disappearing, group_data_not_disappearing in data_not_disappearing.iterrows():
 		data_recurrent = sunspot_data.loc[((group_data_not_disappearing['StartJulianDay'] + 10) < sunspot_data['StartJulianDay']) &
 										  (sunspot_data['StartJulianDay'] < (group_data_not_disappearing['StartJulianDay'] + 30))]
 					
 		# times matched
 		for index, group_data in data_recurrent.iterrows():
-			precisions = [[1,5], [2,10], [3,15]]
 			for precision_latitude, precision_longitude in precisions:			
 				if ((group_data_not_disappearing['MaxLatitude'] + precision_latitude) >= group_data['MinLatitude'] and 
 				(group_data_not_disappearing['MinLatitude'] + precision_latitude) <= group_data['MaxLatitude'] and 
