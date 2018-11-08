@@ -16,9 +16,19 @@ def main():
 		
 	sunspot_data_final_daily = sunspot_data_fixed
 	sunspot_data_final_daily = sunspot_data_final_daily.append(sunspot_data_no_fix, ignore_index=True)
+	sunspot_data_final_daily = sunspot_data_final_daily.sort_values(by=['JulianDay'])
 	
 	output_matched_groups_data(sunspot_data_final_daily, input_file_name_north, output_file_name_north)
-	output_matched_groups_data(sunspot_data_final_daily, input_file_name_south, output_file_name_south)
+	output_matched_groups_data(sunspot_data_final_daily, input_file_name_south, output_file_name_south)	
+	
+	columns = list(sunspot_data_final_daily.columns.values)
+	sunspot_data_final_daily.loc[:,'JulianDay'] = sunspot_data_final_daily.loc[:,'JulianDay'].astype(int)
+	
+	sunspot_data_final_daily.to_csv( 'dailydata_all_final_tab.txt', sep='	', header = columns, index = None )
+	
+	with open('dailydata_all_final_space.txt', 'w') as ofile: 
+		ofile.write(sunspot_data_final_daily.to_string(header = columns, index = None ))
+	
 	
 	
 def output_matched_groups_data(sunspot_data, input_file_name, output_file_name):
