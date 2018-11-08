@@ -86,6 +86,7 @@ def format_data(sunspot_data):
 	
 	sunspot_data_final = sunspot_data[final_columns_order]
 	sunspot_data_final.columns = final_columns_names
+	sunspot_data_final = sunspot_data_final.sort_values(by=['StartJulianDay'])
 	
 	return sunspot_data_final, final_columns_names
 
