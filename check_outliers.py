@@ -33,7 +33,6 @@ def main():
 						   'JulianDay', 'Longitude*Area', 'Latitude*Area', 'PositionOnDisk', 'CarringtonRotation']
 	
 	data_check_manually = sunspot_data_daily.loc[sunspot_data_daily['NOAA'].isin(list(groups_check_manually))]
-	data_check_manually = data_check_manually.sort_values(by='NOAA')
 	data_check_manually.to_csv( output_file_name_manually_data, sep='	', header = columns_names_daily, index = None )
 	
 	sunspot_data_fixed.to_csv( output_file_name_fixed_data, sep='	', header = columns_names_daily, index = None )
