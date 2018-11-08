@@ -87,6 +87,7 @@ def output_data(sunspot_data):
 	
 	sunspot_data = sunspot_data[columns_names]
 	sunspot_data.columns = columns_names
+	sunspot_data = sunspot_data.sort_values(by=['JulianDay'])
 	sunspot_data.to_csv( output_file_name_daily, sep='	', header = columns_names, index = None )
 	
 	sunspot_data_final, final_columns_names = output_grouped_data.output_data(sunspot_data, output_file_name)
@@ -99,10 +100,15 @@ def output_data(sunspot_data):
 				'StartPosition': 3, 'EndPosition': 3,
 				'LongitudeRange': 2, 'LatitudeRange': 2}
 	sunspot_data_final = sunspot_data_final.round(rounding)
+	sunspot_data_final = sunspot_data_final.sort_values(by=['StartJulianDay'])
 		
 	sunspot_data_final_north = sunspot_data_final.loc[sunspot_data_final['WeightedLatitude'] >= 0]
 	sunspot_data_final_south = sunspot_data_final.loc[sunspot_data_final['WeightedLatitude'] < 0]
-		
+	
+	final_columns_names = ['Year', 'CarrRot', 'NOAA', 'StartDay', 'EndDay', 'Area',
+						   'Longitude', 'Latitude', 'StartPos', 'EndPos', 'MinLong', 'MaxLong',
+						   'LongRange', 'MinLat', 'MaxLat', 'LatRange']
+			
 	with open(output_file_name_north, 'w') as ofile: 
 		ofile.write(sunspot_data_final_north.to_string(header = final_columns_names, index = None ))
 		
